@@ -14,20 +14,12 @@ import java.util.ArrayList;
  */
 public class Snake {
 
-    private ArrayList<Point> body;
-    private Direction direction = Direction.RIGHT;
-    private int growthcounter;
-
-    {
-        body = new ArrayList<>();
-    }
-
     public void move() {
         //create a new location for the head, using the direction
         int x = 0;
         int y = 0;
 
-        switch (direction) {
+        switch (getDirection()) {
             case UP:
                 x = 0;
                 y = -1;
@@ -49,18 +41,26 @@ public class Snake {
                 break;
         }
         //ınsert new head
-        body.add(0, new Point(getHead().x + x, getHead().y + y));
+        getBody().add(0, new Point(getHead().x + x, getHead().y + y));
         //delete the taıl
-        if (growthcounter > 0) {
-            growthcounter--;
+        if (getGrowthcounter() > 0) {
+            setGrowthcounter(getGrowthcounter() - 1);
         } else {
-            body.remove(body.size() - 1);
+            getBody().remove(getBody().size() - 1);
         }
 
     }
 
     public Point getHead() {
-        return body.get(0);
+        return getBody().get(0);
+    }
+
+    private ArrayList<Point> body;
+    private Direction direction = Direction.RIGHT;
+    private int growthcounter;
+
+    {
+        setBody(new ArrayList<Point>());
     }
 
     /* @return 
@@ -80,7 +80,7 @@ public class Snake {
      * @return the growthcounter
      */
     public int getGrowthCounter() {
-        return growthcounter;
+        return getGrowthcounter();
     }
 
     /**
@@ -89,5 +89,33 @@ public class Snake {
     public void setGrowthcounter(int growthcounter) {
         this.growthcounter = growthcounter;
     }
+
+    /**
+     * @return the direction
+     */
+    public Direction getDirection() {
+        return direction;
+    }
+
+    /**
+     * @param direction the direction to set
+     */
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
+    /**
+     * @return the growthcounter
+     */
+    public int getGrowthcounter() {
+        return growthcounter;
+    }
+
+    void grow() {
+       growthcounter += 2;
+    }
+
+
+   
 
 }
