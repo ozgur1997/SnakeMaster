@@ -51,6 +51,28 @@ public class Snake {
 
     }
 
+    public Point getTail() {
+        return body.get(body.size() - 1);
+    }
+
+    public boolean selfHitTest() {
+        for (int i = 1; i < body.size(); i++) {
+            if (getHead().equals(body.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean intersects(Point location) {
+        for (Point bodyLocation : body) {
+            if (bodyLocation.equals(location)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Point getHead() {
         return getBody().get(0);
     }
@@ -112,10 +134,7 @@ public class Snake {
     }
 
     void grow() {
-       growthcounter += 2;
+        growthcounter += 2;
     }
-
-
-   
 
 }

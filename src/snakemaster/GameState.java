@@ -10,6 +10,6 @@ package snakemaster;
  *
  * @author acer
  */
-class body {
-    
+public enum GameState {
+    RUNNING, PAUSED, ENDED ;
 }
