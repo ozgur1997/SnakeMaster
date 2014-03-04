@@ -25,7 +25,7 @@ class SnakeEnvironment extends Environment {
     private Snake snake;
     private ArrayList<Point> apples;
     private ArrayList<Point> poison;
-
+    private ArrayList<Point> bombs;
     private int speed = 0;
     private int moveCounter = speed;
 
@@ -50,9 +50,9 @@ class SnakeEnvironment extends Environment {
         for (int i = 0; i < 5; i++) {
             this.apples.add(getRandomPoint());
         }
-        this.poison = new ArrayList<Point>();
+        this.bombs = new ArrayList<Point>();
         for (int i = 0; i < 5; i++) {
-            this.poison.add(getRandomPoint());
+            this.bombs.add(getRandomPoint());
         }
 
         this.snake = new Snake();
@@ -73,7 +73,7 @@ class SnakeEnvironment extends Environment {
                     moveCounter = speed;
                     if (snake.selfHitTest()) {
                         //set the game state to ENDED
-                        this.gameState =GameState.ENDED;
+                        this.gameState = GameState.ENDED;
                     }
                     speed = -3;
                     checkSnakeIntersection();
@@ -98,9 +98,10 @@ class SnakeEnvironment extends Environment {
                 if (snake.getHead().y >= this.grid.getRows()) {
                     snake.getHead().y = 0;
                 }
-            }
 
-            moveBackgroundImage();
+                moveBackgroundImage();
+
+            }
         }
     }
 
@@ -122,6 +123,12 @@ class SnakeEnvironment extends Environment {
                 //grow method
                 snake.grow();
                 this.setScore(this.getScore() + 5);
+
+                for (int j = 0; j < this.bombs.size(); j++) {
+                    if (snake.getHead().equals(this.bombs.get(j))) {
+                        this.bombs.get(j).setLocation(getRandomPoint());
+                    }
+                }
             }
         }
     }
@@ -138,18 +145,23 @@ class SnakeEnvironment extends Environment {
             this.setScore(this.getScore() + 5);
         } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
             if (snake.getDirection() != Direction.LEFT) {
-              snake.setDirection(Direction.RIGHT);      
+                snake.setDirection(Direction.RIGHT);
             }
         } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
             if (snake.getDirection() != Direction.RIGHT) {
                 snake.setDirection(Direction.LEFT);
             }
         } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-            snake.setDirection(Direction.UP);
+            if (snake.getDirection() != Direction.DOWN) {
+                snake.setDirection(Direction.UP);
+            }
         } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            snake.setDirection(Direction.DOWN);
-        }
+            if (snake.getDirection() != Direction.UP) {
+                snake.setDirection(Direction.DOWN);
 
+            }
+
+        }
     }
 
     @Override
@@ -171,70 +183,78 @@ class SnakeEnvironment extends Environment {
                 for (int i = 0; i < this.apples.size(); i++) {
                     this.apples.get(i);
                     GraphicsPalette.drawApple(graphics, this.grid.getCellPosition(this.apples.get(i)), new Point(this.grid.getCellSize()));
-
                 }
-            }
+                if (this.apples != null) {
+                    for (int i = 0; i < this.bombs.size(); i++) {
+                        this.apples.get(i);
+                        GraphicsPalette.drawBomb(graphics, this.grid.getCellPosition(this.bombs.get(i)), this.grid.getCellSize(), Color.BLACK);
+                    }
+                    {
 
-            Point cellLocation;
-            graphics.setColor(Color.red);
-            if (snake != null) {
-                for (int i = 0; i < snake.getBody().size(); i++) {
-                    if (i == 0) {
-                        graphics.setColor(new Color(199, 97, 20));
-                    } else {
-                        graphics.setColor(new Color(122, 197, 205));
                     }
 
-                    cellLocation = grid.getCellPosition(snake.getBody().get(i));
-                    graphics.fillOval(cellLocation.x, cellLocation.y, grid.getCellWidth(), grid.getCellHeight());
+                    Point cellLocation;
+                    graphics.setColor(Color.red);
+                    if (snake != null) {
+                        for (int i = 0; i < snake.getBody().size(); i++) {
+                            if (i == 0) {
+                                graphics.setColor(new Color(199, 97, 20));
+                            } else {
+                                graphics.setColor(new Color(122, 197, 205));
+                            }
+
+                            cellLocation = grid.getCellPosition(snake.getBody().get(i));
+                            graphics.fillOval(cellLocation.x, cellLocation.y, grid.getCellWidth(), grid.getCellHeight());
+                        }
+                    }
                 }
+
+                //GraphicsPalette.enterPortal(graphics, new Point(50, 50), new Point(40, 40), Color.blue);
+                graphics.setColor(Color.GRAY);
+                graphics.fillRect(0, 0, 1020, 80);
+                graphics.setColor(new Color(134, 39, 82));
+                graphics.fillRect(0, 80, 1020, 9);
+
+                int[] xs = {180, 160, 360, 380};
+                int[] ys = {0, 80, 80, 0};
+                //graphics.setColor(Color.MAGENTA);
+                graphics.fillPolygon(xs, ys, 4);
+
+                int[] xs1 = {500, 480, 680, 700};
+                int[] ys1 = {0, 80, 80, 0};
+                //graphics.setColor(Color.MAGENTA);
+                graphics.fillPolygon(xs1, ys1, 4);
+
+                graphics.setColor(Color.WHITE);
+                graphics.setFont(new Font("Calibri", Font.ITALIC, 40));
+                graphics.drawString("Score:" + this.getScore(), 10, 30);
+                graphics.setFont(new Font("Calibri", Font.PLAIN, 15));
+                graphics.drawString("Challenge Mode <DRACULA>", 200, 30);
+                graphics.setFont(new Font("Calibri", Font.PLAIN, 15));
+                graphics.drawString("Time Left/9 days", 380, 70);
+                graphics.setFont(new Font("Calibri", Font.PLAIN, 16));
+                graphics.drawString("", 500, 40);
+                graphics.setFont(new Font("Calibri", Font.PLAIN, 25));
+                graphics.drawString("OZGUR TARIM", 690, 30);
+
+                if (gameState == GameState.PAUSED) {
+                    graphics.setFont(new Font("Calibri", Font.CENTER_BASELINE, 62));
+                    graphics.setColor(Color.ORANGE);
+                    graphics.drawString("PAUSED", 400, 300);
+
+                }
+
+                if (gameState == GameState.ENDED) {
+                    graphics.setFont(new Font("Calibri", Font.CENTER_BASELINE, 62));
+                    graphics.setColor(Color.ORANGE);
+                    graphics.drawString("GAME OVER", 400, 300);
+
+                }
+
             }
-        }
-
-        //GraphicsPalette.enterPortal(graphics, new Point(50, 50), new Point(40, 40), Color.blue);
-        graphics.setColor(Color.GRAY);
-        graphics.fillRect(0, 0, 1020, 80);
-        graphics.setColor(new Color(134, 39, 82));
-        graphics.fillRect(0, 80, 1020, 9);
-
-        int[] xs = {180, 160, 360, 380};
-        int[] ys = {0, 80, 80, 0};
-        //graphics.setColor(Color.MAGENTA);
-        graphics.fillPolygon(xs, ys, 4);
-
-        int[] xs1 = {500, 480, 680, 700};
-        int[] ys1 = {0, 80, 80, 0};
-        //graphics.setColor(Color.MAGENTA);
-        graphics.fillPolygon(xs1, ys1, 4);
-
-        graphics.setColor(Color.WHITE);
-        graphics.setFont(new Font("Calibri", Font.ITALIC, 40));
-        graphics.drawString("Score:" + this.getScore(), 10, 30);
-        graphics.setFont(new Font("Calibri", Font.PLAIN, 15));
-        graphics.drawString("Challenge Mode <DRACULA>", 200, 30);
-        graphics.setFont(new Font("Calibri", Font.PLAIN, 15));
-        graphics.drawString("Time Left/9 days", 380, 70);
-        graphics.setFont(new Font("Calibri", Font.PLAIN, 16));
-        graphics.drawString("", 500, 40);
-        graphics.setFont(new Font("Calibri", Font.PLAIN, 15));
-        graphics.drawString("OZGUR TARIM", 690, 30);
-
-        if (gameState == GameState.PAUSED) {
-            graphics.setFont(new Font("Calibri", Font.CENTER_BASELINE, 62));
-            graphics.setColor(Color.ORANGE);
-            graphics.drawString("PAUSED", 400, 300);
 
         }
-
-        if (gameState == GameState.ENDED) {
-            graphics.setFont(new Font("Calibri", Font.CENTER_BASELINE, 62));
-            graphics.setColor(Color.ORANGE);
-            graphics.drawString("GAME OVER", 400, 300);
-
-        }
-
-        
-        }
+    }
 
     private void moveBackgroundImage() {
         if (backgroundImageDirection == Direction.LEFT) {
